@@ -78,8 +78,10 @@
           .then((text) => {
             setStatus("Done.");
             document.getElementById("img-0").src=text;
+            recordButton.disabled = false;
           })
           .catch((error) => {
+                recordButton.disabled = false;
    <!--         console.error("Error sending recording:", error); -->
    <!--         setStatus("Error sending recording. Please try again."); -->
           });
