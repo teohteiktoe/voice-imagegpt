@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Sound to Text</title>
+  </head>
+  <body>
+    <div>
+      <p><h1>Welcome to voice based Image Generator 3</h1></p>
+      <p><h3>Please press start button to start voice recording and press stop button when finish recording<h3></p>
+      <button id="record-btn">Start</button>
+      <button id="stop-btn">Stop</button>
+    </div>
+    <div>
+      <p id="status"></p>
+    </div>
+    <div>
+      <form id="upload-form" method="POST" enctype="multipart/form-data">
+        <img id='img-0' src="{{url_for('static', filename='Empty.png')}}" alt="image is">
+      </form>
+    </div>
+    <script>
+      // Set up variables for recording
+      let recorder = null;
+      let chunks = [];
+      let synth = speechSynthesis;
+
+      // Set up variables for API endpoint and input prompt
+
+
+      // Set up variables for API endpoint and input prompt
+      const apiEndpoint = "{{ url_for('sound_to_text') }}";
+      const inputPrompt = "Convert sound to text:";
+
+      // Set up event listeners for record and stop buttons
+      const recordButton = document.getElementById("record-btn");
+      const stopButton = document.getElementById("stop-btn");
+      recordButton.addEventListener("click", startRecording);
+      stopButton.addEventListener("click", stopRecording);
+
+      // Function to start recording
+      function startRecording() {
+        navigator.mediaDevices.getUserMedia({audio: true})
+          .then(stream => {
+            recorder = new MediaRecorder(stream);
+            recorder.addEventListener("dataavailable", event => chunks.push(event.data));
+            recorder.addEventListener("stop", sendRecording);
+            recorder.start();
+            setStatus("Recording...");
+            recordButton.disabled = true;
+            stopButton.disabled = false;
+          })
+          .catch(error => {
+  <!--        console.error("Error starting recording:", error); -->
+  <!--         setStatus("Error starting recording. Please try again."); -->
+          });
+      }
+
+
+      // Function to stop recording and send the recording to the API
+      function stopRecording() {
+        recorder.stop();
+        setStatus("Processing... and waiting for api call");
+        stopButton.disabled = true;
+        document.getElementById("submit-btn").disabled = false;
+      }
+
+      // Function to send the recording to the API
+      function sendRecording() {
+        const blob = new Blob(chunks, { type: "audio/mp3" });
+        const formData = new FormData();
+        formData.append("file", blob, "recording.mp3");
+        fetch(apiEndpoint, {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.text())
+          .then((text) => {
+            setStatus("Done.");
+            document.getElementById("img-0").src=text;
+          })
+          .catch((error) => {
+   <!--         console.error("Error sending recording:", error); -->
+   <!--         setStatus("Error sending recording. Please try again."); -->
+          });
+        chunks = [];
+      }
+
+
+      // Function to set the status message
+      function setStatus(message) {
+        document.getElementById("status").textContent = message;
+      }
+    </script>
+  </body>
+</html>
