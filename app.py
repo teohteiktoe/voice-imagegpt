@@ -58,7 +58,7 @@ def generate_image_from_sound(audio_file):
 
 
 def generate_image(prompt):
-    url = replicate.run("tstramer/midjourney-diffusion:436b051ebd8f68d23e83d22de5e198e0995357afef113768c20f0b6fcef23c8b",input={"prompt": prompt})
+    url = replicate.run("tstramer/midjourney-diffusion:436b051ebd8f68d23e83d22de5e198e0995357afef113768c20f0b6fcef23c8b",input=prompt)
     return url[0]
     
 # Define Flask route for home page
